@@ -1,7 +1,7 @@
 'use strict';
 
 
-define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function(Phaser, $q, _, constants, gameBoard) {
+define(['lib/phaser', 'lib/q', 'lib/lodash', 'consts/color', 'consts/player', 'gameboard'], function(Phaser, $q, _, COLOR, PLAYER, gameBoard) {
 
 
     function Game() {
@@ -46,10 +46,10 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function
 
             gameBoard.empty();
             
-            this.addPiece(3, 3, constants.WHITE);
-            this.addPiece(4, 4, constants.WHITE);
-            this.addPiece(3, 4, constants.BLACK);
-            this.addPiece(4, 3, constants.BLACK);
+            this.addPiece(3, 3, COLOR.WHITE);
+            this.addPiece(4, 4, COLOR.WHITE);
+            this.addPiece(3, 4, COLOR.BLACK);
+            this.addPiece(4, 3, COLOR.BLACK);
         },
 
     
@@ -63,28 +63,28 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function
 
             if (playable.length > 0) {
 
-                if (this.currentPlayer == constants.HUMAN) {
-                    if (_.includes(playable, constants.HUMAN)) {
+                if (this.currentPlayer == PLAYER.HUMAN) {
+                    if (_.includes(playable, PLAYER.HUMAN)) {
                         this.humanTurn().then(function() {
-                            root.currentPlayer = constants.COMPUTER;
+                            root.currentPlayer = PLAYER.COMPUTER;
                             root.doGameLoop();
                         });
 
                     } else {
-                        this.skipTurn(constants.COMPUTER);
+                        this.skipTurn(PLAYER.COMPUTER);
                     }
 
                 } else {
 
-                    if (_.includes(playable, constants.COMPUTER)) {
+                    if (_.includes(playable, PLAYER.COMPUTER)) {
 
                         this.computerTurn().then(function() {
-                            root.currentPlayer = constants.HUMAN;
+                            root.currentPlayer = PLAYER.HUMAN;
                             root.doGameLoop();
                         });
 
                     } else {
-                        this.skipTurn(constants.COMPUTER);
+                        this.skipTurn(PLAYER.COMPUTER);
                     }
                 }
 
@@ -126,7 +126,7 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function
         addPiece: function(x, y, color) {
             var posX = this.cellSize * x + this.startX,
                 posY = this.cellSize * y + this.startY,
-                frame = (color == constants.WHITE) ? 0 : 24;
+                frame = (color == COLOR.WHITE) ? 0 : 24;
 
 
             var piece = this.game.add.sprite(posX, posY, 'piece', frame);
@@ -137,16 +137,16 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function
 
             piece.flipToBlack = function() {
                 this.animations.play('flip-to-black');
-                this.color = constants.BLACK;
+                this.color = COLOR.BLACK;
             }
 
             piece.flipToWhite = function() {
                 this.animations.play('flip-to-white');
-                this.color = constants.WHITE;
+                this.color = COLOR.WHITE;
             }
 
             piece.flip = function() {
-                if (this.color == constants.WHITE) this.flipToBlack();
+                if (this.color == COLOR.WHITE) this.flipToBlack();
                 else this.flipToWhite();
             }
 

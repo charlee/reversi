@@ -1,6 +1,6 @@
 'use strict';
 
-define(['constants'], function(constants) {
+define(['consts/dir'], function(DIR) {
     
     var instance = null;
 
@@ -60,7 +60,6 @@ define(['constants'], function(constants) {
         _cellPlayable: function(x, y, color) {
             if (this.pieces[x][y]) return false;
             else {
-                
             }
         },
     };
