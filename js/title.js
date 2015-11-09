@@ -1,9 +1,6 @@
 'use strict';
 
-(function() {
-
-
-    if (!window.OthelloGame) { window.OthelloGame = {}; }
+define(['lib/phaser', 'lib/lodash'], function(Phaser, _) {
 
     var Title = function() {
         Phaser.State.call(this);
@@ -36,6 +33,6 @@
 
     });
 
-    OthelloGame.Title = Title;
+    return Title;
+});
 
-})();

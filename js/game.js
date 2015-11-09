@@ -1,11 +1,10 @@
 'use strict';
 
-(function() {
+
+define(['lib/phaser', 'lib/q', 'lib/lodash'], function(Phaser, $q, _) {
 
     var WHITE = 1,
         BLACK = 2;
-
-    if (!window.OthelloGame) { window.OthelloGame = {}; }
 
     function GameBoard() {
         this.pieces = [];
@@ -204,5 +203,6 @@
         }
     });
 
-    OthelloGame.Game = Game;
-})();
+    return Game;
+
+});
