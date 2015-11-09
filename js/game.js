@@ -2,6 +2,9 @@
 
 (function() {
 
+    var WHITE = 1,
+        BLACK = 2;
+
     if (!window.OthelloGame) { window.OthelloGame = {}; }
 
     function GameBoard() {
@@ -24,9 +27,28 @@
             }
         },
 
+        setPlayerColor: function(color) {
+            this.playerColor = color;
+        },
+
         add: function(x, y, piece) {
             this.pieces[x][y] = piece;
-        }
+        },
+        
+        /**
+         * Test if the board is playable.
+         * @return Array of whom can play the next step.
+         */
+        playable: function() {
+            return true;
+        },
+
+        _cellPlayable: function(x, y, color) {
+            if (this.pieces[x][y]) return false;
+            else {
+                
+            }
+        },
     }
 
     var Game = function() {
@@ -37,16 +59,13 @@
 
         constructor: Game,
 
-        WHITE: 1,
-        BLACK: 2,
-
         preload: function() {
             this.game.load.spritesheet('piece', 'img/piece.png', 64, 64);
             this.game.load.image('board', 'img/board.png');
             this.game.load.image('background', 'img/bg-tile.jpg');
         },
 
-        init: function() {
+        init: function(params) {
             this.boardX = this.game.world.centerX - 300;
             this.boardY = this.game.world.centerY - 300;
 
@@ -55,6 +74,8 @@
             this.cellSize = 61;
 
             this.gameBoard = new GameBoard();
+
+            this.playerColor = (params.player == 'white') ? WHITE: BLACK;
         },
 
         create: function() {
@@ -62,6 +83,8 @@
             this.game.add.image(this.boardX, this.boardY, 'board');
 
             this.initGame();
+
+            this.doGameLoop();
         },
 
         /**
@@ -71,17 +94,87 @@
 
             this.gameBoard.empty();
             
-            this.addPiece(3, 3, this.WHITE);
-            this.addPiece(4, 4, this.WHITE);
-            this.addPiece(3, 4, this.BLACK);
-            this.addPiece(4, 3, this.BLACK);
+            this.addPiece(3, 3, WHITE);
+            this.addPiece(4, 4, WHITE);
+            this.addPiece(3, 4, BLACK);
+            this.addPiece(4, 3, BLACK);
         },
 
+    
+        /**
+         * Main game loop
+         */
+        doGameLoop: function() {
+            var root = this;
 
+            var playable= this.gameBoard.playable();
+
+            if (playable.length > 0) {
+
+                if (this.currentPlayer == 'human') {
+                    if (_.includes(playable, 'human')) {
+                        this.humanTurn().then(function() {
+                            root.currentPlayer = 'computer';
+                            root.doGameLoop();
+                        });
+
+                    } else {
+                        this.skipTurn('human');
+                    }
+
+                } else {
+
+                    if (_.includes(playable, 'computer')) {
+
+                        this.computerTurn().then(function() {
+                            root.currentPlayer = 'human';
+                            root.doGameLoop();
+                        });
+
+                    } else {
+                        this.skipTurn('computer');
+                    }
+                }
+
+            } else {
+                // TODO: show result screen
+            }
+        },
+
+        humanTurn: function() {
+            
+            var deferred = Q.defer();
+
+            // wait for human input
+            window.setTimeout(function() {
+                console.log('human turn over');
+                deferred.resolve();
+
+            }, 1000);
+
+            return deferred.promise;
+        },
+
+        computerTurn: function() {
+            var deferred = Q.defer();
+
+            // wait for human input
+            window.setTimeout(function() {
+                console.log('computer turn over');
+                deferred.resolve();
+
+            }, 1000);
+
+            return deferred.promise;
+        },
+
+        /**
+         * add a piece to the board
+         */
         addPiece: function(x, y, color) {
             var posX = this.cellSize * x + this.startX,
                 posY = this.cellSize * y + this.startY,
-                frame = (color == this.WHITE) ? 0 : 24;
+                frame = (color == WHITE) ? 0 : 24;
 
 
             var piece = this.game.add.sprite(posX, posY, 'piece', frame);
@@ -92,16 +185,16 @@
 
             piece.flipToBlack = function() {
                 this.animations.play('flip-to-black');
-                this.color = this.BLACK;
+                this.color = BLACK;
             }
 
             piece.flipToWhite = function() {
                 this.animations.play('flip-to-white');
-                this.color = this.WHITE;
+                this.color = WHITE;
             }
 
             piece.flip = function() {
-                if (this.color == this.WHITE) this.flipToBlack();
+                if (this.color == WHITE) this.flipToBlack();
                 else this.flipToWhite();
             }
 
