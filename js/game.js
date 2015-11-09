@@ -1,56 +1,10 @@
 'use strict';
 
 
-define(['lib/phaser', 'lib/q', 'lib/lodash'], function(Phaser, $q, _) {
+define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function(Phaser, $q, _, constants, GameBoard) {
 
-    var WHITE = 1,
-        BLACK = 2;
 
-    function GameBoard() {
-        this.pieces = [];
-        for (var i = 0; i < 8; i++) {
-            this.pieces.push([]);
-        }
-    }
-
-    GameBoard.prototype = {
-        constructor: GameBoard,
-        empty: function() {
-            for (var i = 0; i < this.pieces.length; i++) {
-                for (var j = 0; j < this.pieces.length; j++) {
-                    if (this.pieces[i][j] && this.pieces[i][j] instanceof Phaser.Sprite) {
-                        this.pieces[i][j].kill();
-                        this.pieces[i][j] = null;
-                    }
-                }
-            }
-        },
-
-        setPlayerColor: function(color) {
-            this.playerColor = color;
-        },
-
-        add: function(x, y, piece) {
-            this.pieces[x][y] = piece;
-        },
-        
-        /**
-         * Test if the board is playable.
-         * @return Array of whom can play the next step.
-         */
-        playable: function() {
-            return true;
-        },
-
-        _cellPlayable: function(x, y, color) {
-            if (this.pieces[x][y]) return false;
-            else {
-                
-            }
-        },
-    }
-
-    var Game = function() {
+    function Game() {
         Phaser.State.call(this);
     }
 
@@ -74,7 +28,8 @@ define(['lib/phaser', 'lib/q', 'lib/lodash'], function(Phaser, $q, _) {
 
             this.gameBoard = new GameBoard();
 
-            this.playerColor = (params.player == 'white') ? WHITE: BLACK;
+            this.humanColor = params.humanColor;
+            this.computerColor = -this.humanColor;
         },
 
         create: function() {
@@ -93,10 +48,10 @@ define(['lib/phaser', 'lib/q', 'lib/lodash'], function(Phaser, $q, _) {
 
             this.gameBoard.empty();
             
-            this.addPiece(3, 3, WHITE);
-            this.addPiece(4, 4, WHITE);
-            this.addPiece(3, 4, BLACK);
-            this.addPiece(4, 3, BLACK);
+            this.addPiece(3, 3, constants.WHITE);
+            this.addPiece(4, 4, constants.WHITE);
+            this.addPiece(3, 4, constants.BLACK);
+            this.addPiece(4, 3, constants.BLACK);
         },
 
     
@@ -110,28 +65,28 @@ define(['lib/phaser', 'lib/q', 'lib/lodash'], function(Phaser, $q, _) {
 
             if (playable.length > 0) {
 
-                if (this.currentPlayer == 'human') {
-                    if (_.includes(playable, 'human')) {
+                if (this.currentPlayer == constants.HUMAN) {
+                    if (_.includes(playable, constants.HUMAN)) {
                         this.humanTurn().then(function() {
-                            root.currentPlayer = 'computer';
+                            root.currentPlayer = constants.COMPUTER;
                             root.doGameLoop();
                         });
 
                     } else {
-                        this.skipTurn('human');
+                        this.skipTurn(constants.COMPUTER);
                     }
 
                 } else {
 
-                    if (_.includes(playable, 'computer')) {
+                    if (_.includes(playable, constants.COMPUTER)) {
 
                         this.computerTurn().then(function() {
-                            root.currentPlayer = 'human';
+                            root.currentPlayer = constants.HUMAN;
                             root.doGameLoop();
                         });
 
                     } else {
-                        this.skipTurn('computer');
+                        this.skipTurn(constants.COMPUTER);
                     }
                 }
 
@@ -173,7 +128,7 @@ define(['lib/phaser', 'lib/q', 'lib/lodash'], function(Phaser, $q, _) {
         addPiece: function(x, y, color) {
             var posX = this.cellSize * x + this.startX,
                 posY = this.cellSize * y + this.startY,
-                frame = (color == WHITE) ? 0 : 24;
+                frame = (color == constants.WHITE) ? 0 : 24;
 
 
             var piece = this.game.add.sprite(posX, posY, 'piece', frame);
@@ -184,16 +139,16 @@ define(['lib/phaser', 'lib/q', 'lib/lodash'], function(Phaser, $q, _) {
 
             piece.flipToBlack = function() {
                 this.animations.play('flip-to-black');
-                this.color = BLACK;
+                this.color = constants.BLACK;
             }
 
             piece.flipToWhite = function() {
                 this.animations.play('flip-to-white');
-                this.color = WHITE;
+                this.color = constants.WHITE;
             }
 
             piece.flip = function() {
-                if (this.color == WHITE) this.flipToBlack();
+                if (this.color == constants.WHITE) this.flipToBlack();
                 else this.flipToWhite();
             }
 

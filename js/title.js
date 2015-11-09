@@ -1,8 +1,8 @@
 'use strict';
 
-define(['lib/phaser', 'lib/lodash'], function(Phaser, _) {
+define(['lib/phaser', 'lib/lodash', 'constants'], function(Phaser, _, constants) {
 
-    var Title = function() {
+    function Title() {
         Phaser.State.call(this);
     }
 
@@ -24,10 +24,10 @@ define(['lib/phaser', 'lib/lodash'], function(Phaser, _) {
             this.game.add.image(0, 0, 'title-img');
             this.game.add.text(this.game.world.centerX - 200, 50, "Othello", { font: "120px Arial", fill: "#ffffff", align: "center" });
             this.game.add.button(this.game.world.centerX - 178, 490, 'start-button', function() {
-                root.state.start('game', true, false, { player: 'white' });    
+                root.state.start('game', true, false, { humanColor: constants.WHITE });    
             }, this, 1, 0, 2);
             this.game.add.button(this.game.world.centerX - 178, 580, 'start-button', function() {
-                root.state.start('game', true, false, { player: 'black' });    
+                root.state.start('game', true, false, { humanColor: constants.BLACK });    
             }, this, 4, 3, 5);
         },
 
