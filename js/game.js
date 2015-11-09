@@ -1,7 +1,7 @@
 'use strict';
 
 
-define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function(Phaser, $q, _, constants, GameBoard) {
+define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function(Phaser, $q, _, constants, gameBoard) {
 
 
     function Game() {
@@ -26,8 +26,6 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function
             this.startY = this.boardY + 54;
             this.cellSize = 61;
 
-            this.gameBoard = new GameBoard();
-
             this.humanColor = params.humanColor;
             this.computerColor = -this.humanColor;
         },
@@ -46,7 +44,7 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function
          */
         initGame: function() {
 
-            this.gameBoard.empty();
+            gameBoard.empty();
             
             this.addPiece(3, 3, constants.WHITE);
             this.addPiece(4, 4, constants.WHITE);
@@ -61,7 +59,7 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function
         doGameLoop: function() {
             var root = this;
 
-            var playable= this.gameBoard.playable();
+            var playable= gameBoard.playable();
 
             if (playable.length > 0) {
 
@@ -152,7 +150,7 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'constants', 'gameboard'], function
                 else this.flipToWhite();
             }
 
-            this.gameBoard.add(x, y, piece);
+            gameBoard.add(x, y, piece);
 
             return piece;
         }

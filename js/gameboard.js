@@ -1,16 +1,35 @@
 'use strict';
 
 define(['constants'], function(constants) {
+    
+    var instance = null;
 
     function GameBoard() {
-        this.pieces = [];
-        for (var i = 0; i < 8; i++) {
-            this.pieces.push([]);
+        if (instance != null) {
+            throw new Error('Cannot instantiate more than one GameBoard, use GameBoard.getInstance()');
         }
+
+        this.initialize();
+    }
+
+    GameBoard.getInstance = function() {
+        if (instance === null) {
+            instance = new GameBoard();
+        }
+
+        return instance;
     }
 
     GameBoard.prototype = {
         constructor: GameBoard,
+
+        initialize: function() {
+            this.pieces = [];
+            for (var i = 0; i < 8; i++) {
+                this.pieces.push([]);
+            }
+        },
+
         empty: function() {
             for (var i = 0; i < this.pieces.length; i++) {
                 for (var j = 0; j < this.pieces.length; j++) {
@@ -46,5 +65,6 @@ define(['constants'], function(constants) {
         },
     };
 
-    return GameBoard;
+
+    return GameBoard.getInstance();
 });
