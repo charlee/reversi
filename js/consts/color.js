@@ -2,8 +2,13 @@
 
 define([], function() {
     return {
-        BLACK: -1,
-        WHITE: 1,
+        BLACK: 'b',
+        WHITE: 'w',
+        EMPTY: 'e',
+
+        oppositeColor: function(color) {
+            return (color == this.BLACK) ? this.WHITE : this.BLACK;
+        }
     };
 });
 

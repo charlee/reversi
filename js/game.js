@@ -1,7 +1,24 @@
 'use strict';
 
 
-define(['lib/phaser', 'lib/q', 'lib/lodash', 'consts/color', 'consts/player', 'gameboard'], function(Phaser, $q, _, COLOR, PLAYER, gameBoard) {
+define([
+    'lib/phaser',
+    'lib/q',
+    'lib/lodash',
+    'consts/color',
+    'consts/player',
+    'players/humanPlayer',
+    'players/computerPlayer',
+    'gameboard'
+], function(Phaser,
+    $q,
+    _,
+    COLOR,
+    PLAYER,
+    HumanPlayer,
+    ComputerPlayer,
+    gameBoard
+) {
 
 
     function Game() {
@@ -16,6 +33,7 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'consts/color', 'consts/player', 'g
             this.game.load.spritesheet('piece', 'img/piece.png', 64, 64);
             this.game.load.image('board', 'img/board.png');
             this.game.load.image('background', 'img/bg-tile.jpg');
+            this.game.load.image('marker', 'img/marker.png');
         },
 
         init: function(params) {
@@ -26,17 +44,28 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'consts/color', 'consts/player', 'g
             this.startY = this.boardY + 54;
             this.cellSize = 61;
 
-            this.humanColor = params.humanColor;
-            this.computerColor = -this.humanColor;
+            // get human's color choice
+            this.players = {};
+            this.players[COLOR.WHITE] = (params.humanColor == COLOR.WHITE) ? new HumanPlayer() : new ComputerPlayer();
+            this.players[COLOR.BLACK] = (params.humanColor == COLOR.WHITE) ? new ComputerPlayer() : new HumanPlayer();
+
+            // set white first
+            this.currentColor = COLOR.WHITE;
         },
 
         create: function() {
             this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
             this.game.add.image(this.boardX, this.boardY, 'board');
 
+            this.playableMarkers = this.game.add.group();
+
             this.initGame();
 
             this.doGameLoop();
+        },
+
+        currentPlayer: function() {
+            return this.players[this.currentColor];
         },
 
         /**
@@ -52,6 +81,10 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'consts/color', 'consts/player', 'g
             this.addPiece(4, 3, COLOR.BLACK);
         },
 
+        opponentColor: function() {
+            return (this.currentColor == COLOR.BLACK) ? COLOR.WHITE : COLOR.BLACK;
+        },
+
     
         /**
          * Main game loop
@@ -59,47 +92,54 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'consts/color', 'consts/player', 'g
         doGameLoop: function() {
             var root = this;
 
-            var playable= gameBoard.playable();
+            var currentPlayable = gameBoard.playable(this.currentColor),
+                opponentPlayable = gameBoard.playable(this.opponentColor()),
 
-            if (playable.length > 0) {
+                changePlayer = function() {
+                    root.currentColor = root.opponentColor();
+                    root.doGameLoop();
+                };
 
-                if (this.currentPlayer == PLAYER.HUMAN) {
-                    if (_.includes(playable, PLAYER.HUMAN)) {
-                        this.humanTurn().then(function() {
-                            root.currentPlayer = PLAYER.COMPUTER;
-                            root.doGameLoop();
-                        });
+            if (currentPlayable || opponentPlayable) {
 
-                    } else {
-                        this.skipTurn(PLAYER.COMPUTER);
-                    }
-
+                if (currentPlayable) {
+                    this.showMarkers();
+                    this.playTurn().then(changePlayer);
                 } else {
-
-                    if (_.includes(playable, PLAYER.COMPUTER)) {
-
-                        this.computerTurn().then(function() {
-                            root.currentPlayer = PLAYER.HUMAN;
-                            root.doGameLoop();
-                        });
-
-                    } else {
-                        this.skipTurn(PLAYER.COMPUTER);
-                    }
+                    this.skipTurn().then(changePlayer);
                 }
+
 
             } else {
                 // TODO: show result screen
             }
         },
 
-        humanTurn: function() {
-            
-            var deferred = Q.defer();
+        showMarkers: function() {
+            this.playableMarkers.removeAll();
+            var playableCells = gameBoard.playableCells(this.currentColor);
+            for (var i = 0; i < playableCells.length; i++) {
+                this.addMarker(playableCells[i][0], playableCells[i][1]);
+            }
+        },
+
+        skipTurn: function(player) {
+            var deferred = $q.defer();
+
+            window.setTimeout(function() {
+                console.log("skipped turn for " + (player == PLAYER.HUMAN) ? 'human' : 'computer');
+                deferred.resolve();
+            }, 1000);
+
+            return deferred.promise;
+        },
+
+        playTurn: function() {
+            var deferred = $q.defer();
 
             // wait for human input
             window.setTimeout(function() {
-                console.log('human turn over');
+                console.log(' turn over');
                 deferred.resolve();
 
             }, 1000);
@@ -107,18 +147,9 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'consts/color', 'consts/player', 'g
             return deferred.promise;
         },
 
-        computerTurn: function() {
-            var deferred = Q.defer();
-
-            // wait for human input
-            window.setTimeout(function() {
-                console.log('computer turn over');
-                deferred.resolve();
-
-            }, 1000);
-
-            return deferred.promise;
+        skipTurn: function() {
         },
+
 
         /**
          * add a piece to the board
@@ -153,6 +184,19 @@ define(['lib/phaser', 'lib/q', 'lib/lodash', 'consts/color', 'consts/player', 'g
             gameBoard.add(x, y, piece);
 
             return piece;
+        },
+
+        /**
+         * Add a playable marker to the board
+         */
+        addMarker: function(x, y) {
+            var posX = this.cellSize * x + this.startX,
+                posY = this.cellSize * y + this.startY;
+
+            var marker = this.game.add.sprite(posX, posY, 'marker');
+            this.playableMarkers.add(marker);
+
+            return marker;
         }
     });
 
