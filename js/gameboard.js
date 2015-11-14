@@ -45,8 +45,25 @@ define(['consts/dir', 'consts/color'], function(DIR, COLOR) {
             this.playerColor = color;
         },
 
-        add: function(x, y, piece) {
+        add: function(x, y, piece, checkFlip) {
+
             this.pieces[x][y] = piece;
+
+            if (checkFlip) {
+                // find flipable pieces
+                var dirs = _.values(DIR),
+                    flipablePieces = [];
+
+                for (var i = 0; i < dirs.length; i++) {
+                    var flipables = this._checkDir(x, y, dirs[i], piece.color);
+                    if (flipables) {
+                        for (var j = 0; j < flipables.length; j++) {
+                            flipablePieces.push(this.pieces[flipables[j].x][flipables[j].y]);
+                        }
+                    }
+                }
+                return flipablePieces;
+            }
         },
         
         /**
@@ -103,6 +120,8 @@ define(['consts/dir', 'consts/color'], function(DIR, COLOR) {
          */
         _checkDir: function(x, y, dir, color) {
             var dx = 0, dy = 0;
+            var flipables = [];
+
             switch (dir) {
                 case DIR.UP: dx = 0, dy = -1; break;
                 case DIR.UPRIGHT: dx = 1, dy = -1; break;
@@ -115,25 +134,31 @@ define(['consts/dir', 'consts/color'], function(DIR, COLOR) {
             }
 
             x += dx; y += dy;
+
             var dc = this._validColor(x, y);
             if (dc == COLOR.oppositeColor(color)) {
                 // adjacent color is opponent's color, check following cells
                 while (true) {
+                    // push current checked cell
+                    flipables.push({ x: x, y: y });
+
+                    // move to next
                     x += dx; y += dy;
+
                     dc = this._validColor(x, y);
                     if (dc == color) {
                         // found own piece, playable
-                        return true;
+                        return flipables;
                     } else if (dc == null) {
                         // got invalid cell not playable
-                        return false;
+                        return null;
                     } else {
                         // else continue to check next cell
                     }
                 }
             } else {
                 // adjacent color is not opponent, can't play this cell
-                return false;
+                return null;
             }
         },
 

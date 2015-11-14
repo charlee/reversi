@@ -197,7 +197,13 @@ define([
                 else this.flipToWhite();
             }
 
-            gameBoard.add(x, y, piece);
+            var flipables = gameBoard.add(x, y, piece, true);
+            for (var i = 0; i < flipables.length; i++) {
+                flipables[i].flip();
+
+                // TODO: add callback when animation ends
+            }
+
 
             return piece;
         },
