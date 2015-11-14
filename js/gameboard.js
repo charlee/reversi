@@ -73,7 +73,7 @@ define(['consts/dir', 'consts/color'], function(DIR, COLOR) {
             for (var x = 0; x < 8; x++) {
                 for (var y = 0; y < 8; y++) {
                     if (this._cellPlayable(x, y, color)) {
-                        result.push([x, y]);
+                        result.push({ x: x, y: y });
                     };
                 }
             }

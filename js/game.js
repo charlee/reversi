@@ -45,21 +45,37 @@ define([
             this.cellSize = 61;
 
             // get human's color choice
-            this.players = {};
-            this.players[COLOR.WHITE] = (params.humanColor == COLOR.WHITE) ? new HumanPlayer() : new ComputerPlayer();
-            this.players[COLOR.BLACK] = (params.humanColor == COLOR.WHITE) ? new ComputerPlayer() : new HumanPlayer();
+            this.humanColor = params.humanColor;
 
             // set white first
             this.currentColor = COLOR.WHITE;
         },
 
         create: function() {
+            var root = this;
+
             this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'background');
             this.game.add.image(this.boardX, this.boardY, 'board');
 
             this.playableMarkers = this.game.add.group();
 
             this.initGame();
+
+            // init player objects
+            var humanPlayer = new HumanPlayer(),
+                computerPlayer = new ComputerPlayer();
+
+            this.game.input.onTap.add(function(pointer) {
+                var x = Math.floor((pointer.x - root.startX) / root.cellSize),
+                    y = Math.floor((pointer.y - root.startY) / root.cellSize);
+                humanPlayer.click(x, y);
+            });
+
+            this.players = {};
+            //this.players[COLOR.WHITE] = (this.humanColor == COLOR.WHITE) ? humanPlayer : computerPlayer;
+            //this.players[COLOR.BLACK] = (this.humanColor == COLOR.WHITE) ? computerPlayer : humanPlayer;
+            this.players[COLOR.WHITE] = humanPlayer;
+            this.players[COLOR.BLACK] = humanPlayer;
 
             this.doGameLoop();
         },
@@ -119,7 +135,7 @@ define([
             this.playableMarkers.removeAll();
             var playableCells = gameBoard.playableCells(this.currentColor);
             for (var i = 0; i < playableCells.length; i++) {
-                this.addMarker(playableCells[i][0], playableCells[i][1]);
+                this.addMarker(playableCells[i].x, playableCells[i].y);
             }
         },
 
@@ -135,14 +151,14 @@ define([
         },
 
         playTurn: function() {
-            var deferred = $q.defer();
+            var deferred = $q.defer(),
+                root = this;
 
             // wait for human input
-            window.setTimeout(function() {
-                console.log(' turn over');
+            this.currentPlayer().getMove(this.currentColor).then(function(pos) {
+                root.addPiece(pos.x, pos.y, root.currentColor);
                 deferred.resolve();
-
-            }, 1000);
+            });
 
             return deferred.promise;
         },
