@@ -15,12 +15,10 @@ define(['lib/lodash', 'lib/q', './player', '../gameboard'], function(_, $q, Play
                 deferred = $q.defer();
 
             var playableCells = gameBoard.playableCells(color);
-            console.log(playableCells);
             
             console.log('human turn');
 
             this.setOnClickHandler(function(pos) {
-                console.log(pos);
                 for (var i = 0; i < playableCells.length; i++) {
                     if (playableCells[i].x == pos.x && playableCells[i].y == pos.y) {
                         root.setOnClickHandler(null);

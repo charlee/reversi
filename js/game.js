@@ -72,10 +72,8 @@ define([
             });
 
             this.players = {};
-            //this.players[COLOR.WHITE] = (this.humanColor == COLOR.WHITE) ? humanPlayer : computerPlayer;
-            //this.players[COLOR.BLACK] = (this.humanColor == COLOR.WHITE) ? computerPlayer : humanPlayer;
-            this.players[COLOR.WHITE] = humanPlayer;
-            this.players[COLOR.BLACK] = humanPlayer;
+            this.players[COLOR.WHITE] = (this.humanColor == COLOR.WHITE) ? humanPlayer : computerPlayer;
+            this.players[COLOR.BLACK] = (this.humanColor == COLOR.WHITE) ? computerPlayer : humanPlayer;
 
             this.doGameLoop();
         },

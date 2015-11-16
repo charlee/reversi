@@ -13,16 +13,16 @@ define(['lib/lodash', 'lib/q', './player', '../gameboard'], function(_, $q, Play
         getMove: function(color) {
             var deferred = $q.defer();
             
+            var playableCells = gameBoard.playableCells(color);
+
             console.log('computer turn');
+
             window.setTimeout(function() {
-                deferred.resolve({ x: 1, y: 2 });
-            }, 1000);
+                deferred.resolve(playableCells[0]);
+            }, 100);
 
             return deferred.promise;
-
-
         }
-
 
     });
 
