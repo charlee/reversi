@@ -1,6 +1,34 @@
 'use strict';
 
-define(['lib/lodash', 'lib/q', './player', '../gameboard'], function(_, $q, Player, gameBoard) {
+define(['lib/lodash', 'lib/q', './player'], function(_, $q, Player) {
+
+    var AI = {
+        board: null,
+
+        /**
+         * init, copy from game board
+         */
+        init: function() {
+
+            console.log(this.board);
+        },
+
+        validMoves: function() {
+        },
+
+        /**
+         * evaluate function for current board
+         */
+        evaluate: function() {
+            return 0;
+        },
+
+        /**
+         * find best move
+         */
+        negaMax: function(depth) {
+        },
+    };
 
     function ComputerPlayer() {
         Player.call(this);
@@ -12,8 +40,10 @@ define(['lib/lodash', 'lib/q', './player', '../gameboard'], function(_, $q, Play
 
         getMove: function(color) {
             var deferred = $q.defer();
+
+            AI.init();
             
-            var playableCells = gameBoard.playableCells(color);
+            var playableCells = this.gameBoard.playableCells(color);
 
             console.log('computer turn');
 

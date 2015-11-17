@@ -17,7 +17,7 @@ define([
     PLAYER,
     HumanPlayer,
     ComputerPlayer,
-    gameBoard
+    GameBoard
 ) {
 
 
@@ -44,6 +44,12 @@ define([
             this.startY = this.boardY + 54;
             this.cellSize = 61;
 
+            this.gameBoard = new GameBoard();
+            this.pieces = [];
+            for (var i = 0; i < 8; i++) {
+                this.pieces.push([]);
+            }
+
             // get human's color choice
             this.humanColor = params.humanColor;
 
@@ -64,6 +70,9 @@ define([
             // init player objects
             var humanPlayer = new HumanPlayer(),
                 computerPlayer = new ComputerPlayer();
+
+            humanPlayer.setGameBoard(this.gameBoard);
+            computerPlayer.setGameBoard(this.gameBoard);
 
             this.game.input.onTap.add(function(pointer) {
                 var x = Math.floor((pointer.x - root.startX) / root.cellSize),
@@ -87,7 +96,13 @@ define([
          */
         initGame: function() {
 
-            gameBoard.empty();
+            this.gameBoard.empty();
+            for (var x = 0; x < 8; x++) {
+                for (var y = 0; y < 8; y++) {
+                    if (this.pieces[x][y]) this.pieces[x][y].kill();
+                    this.pieces[x][y] = null;
+                }
+            }
             
             this.addPiece(3, 3, COLOR.WHITE);
             this.addPiece(4, 4, COLOR.WHITE);
@@ -106,8 +121,8 @@ define([
         doGameLoop: function() {
             var root = this;
 
-            var currentPlayable = gameBoard.playable(this.currentColor),
-                opponentPlayable = gameBoard.playable(this.opponentColor()),
+            var currentPlayable = this.gameBoard.playable(this.currentColor),
+                opponentPlayable = this.gameBoard.playable(this.opponentColor()),
 
                 changePlayer = function() {
                     window.setTimeout(function() {
@@ -133,7 +148,8 @@ define([
 
         showMarkers: function() {
             this.playableMarkers.removeAll();
-            var playableCells = gameBoard.playableCells(this.currentColor);
+            var playableCells = this.gameBoard.playableCells(this.currentColor);
+            console.log(playableCells);
             for (var i = 0; i < playableCells.length; i++) {
                 this.addMarker(playableCells[i].x, playableCells[i].y);
             }
@@ -197,9 +213,11 @@ define([
                 else this.flipToWhite();
             }
 
-            var flipables = gameBoard.add(x, y, piece, true);
+            this.pieces[x][y] = piece;
+            var flipables = this.gameBoard.add(x, y, color, true);
             for (var i = 0; i < flipables.length; i++) {
-                flipables[i].flip();
+                var pos = flipables[i];
+                this.pieces[pos.x][pos.y].flip();
 
                 // TODO: add callback when animation ends
             }

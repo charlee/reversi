@@ -1,6 +1,6 @@
 'use strict';
 
-define(['lib/lodash', 'lib/q', './player', '../gameboard'], function(_, $q, Player, gameBoard) {
+define(['lib/lodash', 'lib/q', './player'], function(_, $q, Player ) {
 
     function HumanPlayer() {
         Player.call(this);
@@ -14,7 +14,7 @@ define(['lib/lodash', 'lib/q', './player', '../gameboard'], function(_, $q, Play
             var root = this,
                 deferred = $q.defer();
 
-            var playableCells = gameBoard.playableCells(color);
+            var playableCells = this.gameBoard.playableCells(color);
             
             console.log('human turn');
 

@@ -13,7 +13,11 @@ define([], function() {
     Player.prototype = {
         constructor: Player,
         getMove: function(color) {
-        }
+        },
+
+        setGameBoard: function(gameBoard) {
+            this.gameBoard = gameBoard;
+        },
     };
 
 
