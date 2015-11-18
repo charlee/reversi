@@ -22,7 +22,7 @@ define(['lib/phaser', 'lib/lodash', 'consts/color'], function(Phaser, _, COLOR) 
             var root = this;
 
             this.game.add.image(0, 0, 'title-img');
-            this.game.add.text(this.game.world.centerX - 200, 50, "Othello", { font: "120px Arial", fill: "#ffffff", align: "center" });
+            this.game.add.text(this.game.world.centerX - 200, 50, "Reversi", { font: "120px Arial", fill: "#ffffff", align: "center" });
             this.game.add.button(this.game.world.centerX - 178, 490, 'start-button', function() {
                 root.state.start('game', true, false, { humanColor: COLOR.WHITE });    
             }, this, 1, 0, 2);
