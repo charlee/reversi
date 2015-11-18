@@ -84,6 +84,9 @@ define([
             this.players[COLOR.WHITE] = (this.humanColor == COLOR.WHITE) ? humanPlayer : computerPlayer;
             this.players[COLOR.BLACK] = (this.humanColor == COLOR.WHITE) ? computerPlayer : humanPlayer;
 
+            this.players[COLOR.WHITE].setColor(COLOR.WHITE);
+            this.players[COLOR.BLACK].setColor(COLOR.BLACK);
+
             this.doGameLoop();
         },
 
@@ -125,7 +128,9 @@ define([
                 opponentPlayable = this.gameBoard.playable(this.opponentColor()),
 
                 changePlayer = function() {
+                    console.log('change playter after 1s');
                     window.setTimeout(function() {
+                        console.log('change player');
                         root.currentColor = root.opponentColor();
                         root.doGameLoop();
                     }, 1000);
@@ -149,7 +154,6 @@ define([
         showMarkers: function() {
             this.playableMarkers.removeAll();
             var playableCells = this.gameBoard.playableCells(this.currentColor);
-            console.log(playableCells);
             for (var i = 0; i < playableCells.length; i++) {
                 this.addMarker(playableCells[i].x, playableCells[i].y);
             }
@@ -171,7 +175,7 @@ define([
                 root = this;
 
             // wait for human input
-            this.currentPlayer().getMove(this.currentColor).then(function(pos) {
+            this.currentPlayer().getMove().then(function(pos) {
                 root.addPiece(pos.x, pos.y, root.currentColor);
                 deferred.resolve();
             });
@@ -239,6 +243,13 @@ define([
             return marker;
         }
     });
+
+    GameBoard.copy = function(gameBoard) {
+        var board = new GameBoard();
+        board.pieces = _.clone(gameBoard.pieces, true);
+
+        return board;
+    };
 
     return Game;
 

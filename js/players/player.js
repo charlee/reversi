@@ -18,6 +18,10 @@ define([], function() {
         setGameBoard: function(gameBoard) {
             this.gameBoard = gameBoard;
         },
+
+        setColor: function(color) {
+            this.color = color;
+        },
     };
 
 

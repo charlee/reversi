@@ -38,12 +38,25 @@ define(['consts/dir', 'consts/color'], function(DIR, COLOR) {
                     var flipables = this._checkDir(x, y, dirs[i], color);
                     if (flipables) {
                         for (var j = 0; j < flipables.length; j++) {
-                            flipablePieces.push(flipables[j]);
+                            var pos = flipables[j];
+                            flipablePieces.push(pos);
+                            this.pieces[pos.x][pos.y] = COLOR.oppositeColor(this.pieces[pos.x][pos.y]);
                         }
                     }
                 }
                 return flipablePieces;
             }
+        },
+
+        count: function(color) {
+            var count = 0;
+            for (var x = 0; x < 8; x++) {
+                for (var y = 0; y < 8; y++) {
+                    if (this.pieces[x][y] == color) count++;
+                }
+            }
+
+            return count;
         },
         
         /**
@@ -146,7 +159,12 @@ define(['consts/dir', 'consts/color'], function(DIR, COLOR) {
          * Vaildate cooridate (x, y) and return its color if possilbe
          */
         _validColor: function(x, y) {
-            return (x >= 0 && x < 8 && y >= 0 && y < 8) ? this.pieces[x][y] : null;
+            if (x >= 0 && x < 8 && y >= 0 && y < 8) {
+                if (this.pieces[x][y] && this.pieces[x][y] != COLOR.EMPTY) {  return this.pieces[x][y]; }
+                else { return null; }
+            } else {
+                return null;
+            }
         }
     };
 
