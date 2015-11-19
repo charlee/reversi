@@ -87,6 +87,19 @@ define([
             this.players[COLOR.WHITE].setColor(COLOR.WHITE);
             this.players[COLOR.BLACK].setColor(COLOR.BLACK);
 
+            var textStyle = { font: '24px Arial', fill: '#000000', align: 'left' };
+            if (this.humanColor == COLOR.WHITE) {
+                this.game.add.text(this.boardX + 64, 30, 'Player', textStyle);
+                this.game.add.text(this.boardX + 426, 30, 'Computer', textStyle);
+            } else {
+                this.game.add.text(this.boardX + 64, 30, 'Computer', textStyle);
+                this.game.add.text(this.boardX + 466, 30, 'Player', textStyle);
+            }
+            this.game.add.sprite(this.boardX, 16, 'piece', 0);
+            this.game.add.sprite(this.boardX + 550, 16, 'piece', 24);
+            this.whiteCount = this.game.add.text(this.boardX + 220, 30, '2', textStyle);
+            this.blackCount = this.game.add.text(this.boardX + 360, 30, '2', textStyle);
+
             this.doGameLoop();
         },
 
@@ -128,6 +141,11 @@ define([
                 opponentPlayable = this.gameBoard.playable(this.opponentColor()),
 
                 changePlayer = function() {
+                    // update score
+                    root.whiteCount.text = root.gameBoard.count(COLOR.WHITE);
+                    root.blackCount.text = root.gameBoard.count(COLOR.BLACK);
+                    
+                    // change to next player
                     window.setTimeout(function() {
                         root.currentColor = root.opponentColor();
                         root.doGameLoop();
