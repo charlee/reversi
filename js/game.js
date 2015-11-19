@@ -128,9 +128,7 @@ define([
                 opponentPlayable = this.gameBoard.playable(this.opponentColor()),
 
                 changePlayer = function() {
-                    console.log('change playter after 1s');
                     window.setTimeout(function() {
-                        console.log('change player');
                         root.currentColor = root.opponentColor();
                         root.doGameLoop();
                     }, 1000);
