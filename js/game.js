@@ -34,6 +34,7 @@ define([
             this.game.load.image('board', 'img/board.png');
             this.game.load.image('background', 'img/bg-tile.jpg');
             this.game.load.image('marker', 'img/marker.png');
+            this.game.load.image('msgboard', 'img/message-board.png');
         },
 
         init: function(params) {
@@ -52,9 +53,6 @@ define([
 
             // get human's color choice
             this.humanColor = params.humanColor;
-
-            // set white first
-            this.currentColor = COLOR.WHITE;
         },
 
         create: function() {
@@ -111,19 +109,33 @@ define([
          * init game state
          */
         initGame: function() {
+            
+            var boardSetup = [
+                '........',
+                '........',
+                '........',
+                '...bw...',
+                '...wb...',
+                '........',
+                '........',
+                '........',
+            ];
 
             this.gameBoard.empty();
-            for (var x = 0; x < 8; x++) {
-                for (var y = 0; y < 8; y++) {
+            for (var y = 0; y < 8; y++) {
+                for (var x = 0; x < 8; x++) {
                     if (this.pieces[x][y]) this.pieces[x][y].kill();
-                    this.pieces[x][y] = null;
+                    var ch = boardSetup[y].charAt(x);
+                    if (ch == '.') {
+                        this.pieces[x][y] = null;
+                    } else {
+                        this.addPiece(x, y, ch, false);
+                    }
                 }
             }
-            
-            this.addPiece(3, 3, COLOR.WHITE);
-            this.addPiece(4, 4, COLOR.WHITE);
-            this.addPiece(3, 4, COLOR.BLACK);
-            this.addPiece(4, 3, COLOR.BLACK);
+
+            // set white first
+            this.currentColor = COLOR.WHITE;
         },
 
         opponentColor: function() {
@@ -164,6 +176,9 @@ define([
 
             } else {
                 // TODO: show result screen
+                var whiteCount = this.gameBoard.count(COLOR.WHITE),
+                    blackCount = this.gameBoard.count(COLOR.BLACK);
+                this.showMsg('Game end, ' + ((whiteCount > blackCount) ? 'WHITE wins!' : (whiteCount < blackCount) ? 'BLACK wins!' : 'tie!'));
             }
         },
 
@@ -175,15 +190,9 @@ define([
             }
         },
 
-        skipTurn: function(player) {
-            var deferred = $q.defer();
-
-            window.setTimeout(function() {
-                console.log("skipped turn for " + (player == PLAYER.HUMAN) ? 'human' : 'computer');
-                deferred.resolve();
-            }, 1000);
-
-            return deferred.promise;
+        skipTurn: function() {
+            var msg = 'No valid move for ' + ((this.currentColor == COLOR.WHITE) ? 'white': 'black') + ', skip turn';
+            return this.showMsg(msg);
         },
 
         playTurn: function() {
@@ -206,7 +215,11 @@ define([
         /**
          * add a piece to the board
          */
-        addPiece: function(x, y, color) {
+        addPiece: function(x, y, color, checkFlip) {
+
+            // set default value
+            if (checkFlip == null) checkFlip = true;
+
             var posX = this.cellSize * x + this.startX,
                 posY = this.cellSize * y + this.startY,
                 frame = (color == COLOR.WHITE) ? 0 : 24;
@@ -234,16 +247,40 @@ define([
             }
 
             this.pieces[x][y] = piece;
-            var flipables = this.gameBoard.add(x, y, color, true);
-            for (var i = 0; i < flipables.length; i++) {
-                var pos = flipables[i];
-                this.pieces[pos.x][pos.y].flip();
 
-                // TODO: add callback when animation ends
+            if (checkFlip) {
+                var flipables = this.gameBoard.add(x, y, color, true);
+                for (var i = 0; i < flipables.length; i++) {
+                    var pos = flipables[i];
+                    this.pieces[pos.x][pos.y].flip();
+
+                    // TODO: add callback when animation ends
+                }
+            } else {
+                this.gameBoard.add(x, y, color, false);
             }
 
-
             return piece;
+        },
+
+        /**
+         * Show message box
+         */
+        showMsg: function(msg, timeout) {
+            
+            if (!timeout) timeout = 2000;
+            var deferred = $q.defer();
+
+            var msgbox = this.game.add.sprite(206, 200, 'msgboard'),
+                msg = this.game.add.text(260, 260, msg);
+
+            window.setTimeout(function() {
+                msgbox.kill();
+                msg.kill();
+                deferred.resolve();
+            }, timeout);
+
+            return deferred.promise;
         },
 
         /**

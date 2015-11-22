@@ -52,8 +52,11 @@ define(['lib/lodash', 'lib/q', './player', 'gameboard', 'consts/color'], functio
             var scoreValue = myScore - opScore;
 
             var myValidMoves = this.board.playableCells(this.color),
-                opponentValidMoves = this.board.playableCells(COLOR.oppositeColor(this.color));
-            var mobilityValue = 100 * (myValidMoves.length - opponentValidMoves.length) / (myValidMoves.length + opponentValidMoves.length);
+                opponentValidMoves = this.board.playableCells(COLOR.oppositeColor(this.color)),
+                myMoveCount = myValidMoves.length,
+                opMoveCount = opponentValidMoves.length;
+            var mobilityValue = (myMoveCount + opMoveCount == 0) ? 0 :              // avoid div by 0
+                                100 * (myValidMoves.length - opponentValidMoves.length) / (myValidMoves.length + opponentValidMoves.length);
 
             return 10 * countValue + 40 * scoreValue + 10 * mobilityValue;
         },
@@ -75,33 +78,45 @@ define(['lib/lodash', 'lib/q', './player', 'gameboard', 'consts/color'], functio
 
             var moves = this.board.playableCells(color);
             if (initial) console.log(moves);
-            for (var i = 0; i < moves.length; i++) {
-                var move = moves[i];
 
-                // save game state
-                this.boardStack.push(this.board);
-                this.board = new GameBoard.copy(this.board);
+            if (moves.length) {
+                for (var i = 0; i < moves.length; i++) {
+                    var move = moves[i];
 
-                this.board.add(move.x, move.y, color, true);
+                    // save game state
+                    this.boardStack.push(this.board);
+                    this.board = new GameBoard.copy(this.board);
 
+                    this.board.add(move.x, move.y, color, true);
+
+                    var value = -this.alphaBeta(depth - 1, -beta, -alpha, COLOR.oppositeColor(color));
+
+                    // restore game state
+                    this.board = this.boardStack.pop();
+
+                    if (initial) {
+                        console.log('score for (' + move.x + ', ' + move.y + ') = ' + value);
+                    }
+
+                    if (value >= beta) { 
+                        if (initial) {
+                            return result;
+                        }
+                        return beta;
+                    }
+                    if (value > alpha) {
+                        alpha = value;
+                        if (initial) {
+                            result = move;
+                            console.log('found better move (' + move.x + ', ' + move.y + '), score=' + value);
+                        }
+                    }
+                }
+            } else {
+                // if no valid moves, skip this player
                 var value = -this.alphaBeta(depth - 1, -beta, -alpha, COLOR.oppositeColor(color));
-
-                // restore game state
-                this.board = this.boardStack.pop();
-
-                if (value >= beta) { 
-                    if (initial) {
-                        return result;
-                    }
-                    return beta;
-                }
-                if (value > alpha) {
-                    alpha = value;
-                    if (initial) {
-                        result = move;
-                        console.log('found better move (' + move.x + ', ' + move.y + '), score=' + value);
-                    }
-                }
+                if (value >= beta) { return beta; }
+                if (value > alpha) { alpha = value; }
             }
 
             if (initial) {
